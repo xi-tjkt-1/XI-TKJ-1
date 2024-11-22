@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
   <link rel="icon" href="/app.js/WhatsApp Image 2023-09-24 at 1.53.42 AM.jpeg" type="image/jpeg">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  
   <style>
     * {
       margin: 0;
@@ -18,6 +20,8 @@
       font-family: 'Poppins', sans-serif;
       scroll-behavior: smooth;
     }
+
+    
 
     body {
       background-color: #12171e;
@@ -1797,12 +1801,12 @@ textarea {
   }
 
   .footer-text {
-    justify-content: flex-start; /* Teks rata tengah di layar kecil */
+    justify-content:center; /* Teks rata tengah di layar kecil */
     flex-wrap: wrap; /* Pecah jadi 2 baris jika teks terlalu panjang */
   }
 
   .footer-copyright {
-    text-align:start;
+    text-align:center;
   }
 }
 
@@ -1903,6 +1907,108 @@ textarea {
 ::-webkit-scrollbar-thumb:active {
   background: linear-gradient(45deg, #008ae6, #006bb5); /* Warna saat klik */
 }
+
+.custom-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border-radius: 8px; /* Membuat sudut sedikit melengkung */
+  width: 400px; /* Lebar tetap */
+  min-height: 60px; /* Tinggi minimum */
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  position: fixed; /* Tetap di layar saat scroll */
+  top: 50%; /* Posisi vertikal tengah */
+  left: 50%; /* Posisi horizontal tengah */
+  transform: translate(-50%, -50%); /* Offset untuk pusatkan elemen */
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3); /* Efek bayangan */
+  z-index: 9999; /* Pastikan di atas elemen lainnya */
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 0; /* Awalnya transparan */
+  visibility: hidden; /* Awalnya tidak terlihat */
+}
+
+.custom-alert .icon {
+  margin-right: 10px; /* Jarak antara ikon dan teks */
+  font-size: 1.8rem; /* Ukuran ikon lebih besar */
+}
+
+.custom-alert .message {
+  flex: 1; /* Membuat teks memenuhi ruang */
+  text-align: left; /* Rata kiri */
+  margin-right: 10px; /* Jarak dengan tombol close */
+}
+
+.custom-alert .close-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: inherit;
+  cursor: pointer;
+  margin-left: 10px; /* Jarak dari teks */
+  padding: 5px 10px;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.2); /* Tombol transparan */
+  transition: background-color 0.3s;
+}
+
+.custom-alert .close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.4); /* Efek hover tombol */
+}
+
+.custom-alert.success {
+  background: linear-gradient(45deg, #d4edda, #c3e6cb); /* Warna hijau terang */
+  color: #155724;
+}
+
+.custom-alert.success .icon {
+  color: #28a745; /* Ikon centang hijau */
+}
+
+.custom-alert.info {
+  background: linear-gradient(45deg, #d1ecf1, #bee5eb); /* Warna biru terang */
+  color: #0c5460;
+}
+
+.custom-alert.info .icon {
+  color: #17a2b8; /* Ikon info biru */
+}
+
+.custom-alert.warning {
+  background: linear-gradient(45deg, #fff3cd, #ffeeba); /* Warna kuning terang */
+  color: #856404;
+}
+
+.custom-alert.warning .icon {
+  color: #ffc107; /* Ikon warning kuning */
+}
+
+.custom-alert.danger {
+  background: linear-gradient(45deg, #f8d7da, #f5c6cb); /* Warna merah terang */
+  color: #721c24;
+}
+
+.custom-alert.danger .icon {
+  color: #dc3545; /* Ikon silang merah */
+}
+
+/* Animasi untuk masuk dan keluar */
+.custom-alert.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -60%); /* Geser ke atas saat disembunyikan */
+}
+
+.custom-alert.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%); /* Tetap di tengah */
+}
+
+
+
+
 
 
 
@@ -2202,6 +2308,13 @@ textarea {
     <!-- Section 4: Contact -->
     <section id="kontak" class="section-4" >
       <h2 data-aos="fade-down">Contact <span>Me</span> </h2>
+
+      <div id="alert" class="alert" style="display: none;">
+        <span class="icon"></span>
+        <span class="message"></span>
+        <span class="close-btn" onclick="closeAlert()">&times;</span>
+      </div>
+
       <form id="contact-form" class="contact-form" autocomplete="off" data-aos="flip-left">
         <div class="form-row">
           <div class="form-group">
@@ -2473,34 +2586,76 @@ window.addEventListener('scroll', () => {
 
 
 <script>
-  (function () {
-    emailjs.init("lBHrzVtFE9P9CULV8"); // Ganti dengan public key EmailJS lu
-  })();
+(function () {
+  emailjs.init("lBHrzVtFE9P9CULV8"); // Ganti dengan public key EmailJS lu
+})();
 
-  const form = document.getElementById("contact-form");
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
+// Fungsi untuk menampilkan custom alert
+function showAlert(type, message) {
+  const alertBox = document.getElementById("alert");
+  alertBox.style.display = "flex";
+  alertBox.className = `custom-alert ${type} show`
+  alertBox.querySelector(".message").innerText = message;
 
-    const formData = new FormData(form);
-    const data = {
-      from: formData.get("from"),
-      to: formData.get("to"),
-      message: formData.get("message"),
-      song: formData.get("song") || "No song provided",
-    };
+  // Set ikon berdasarkan tipe
+  const icon = alertBox.querySelector(".icon");
+  switch (type) {
+    case "success":
+      icon.innerHTML = "&#10003;"; // Centang
+      break;
+    case "info":
+      icon.innerHTML = "&#9432;"; // Info
+      break;
+    case "warning":
+      icon.innerHTML = "&#9888;"; // Warning
+      break;
+    case "danger":
+      icon.innerHTML = "&#10060;"; // Silang
+      break;
+  }
 
-    emailjs
-      .send("service_m8pxw3b", "template_xbuqc7d", data)
-      .then(() => {
-        alert("Message Sent Successfully!");
-        form.reset();
-      })
-      .catch((err) => {
-        console.error("Error Status:", err.status); // Status error
-    console.error("Error Text:", err.text);     // Detail error
-        alert("Failed to send Message. Please try again.");
-      });
-  });
+  // Auto-hide alert setelah 5 detik
+  setTimeout(() => {
+    alertBox.classList.remove("show");
+    alertBox.classList.add("hidden");
+    setTimeout(() => (alertBox.style.display = "none"), 300); // Tunggu animasi selesai
+  }, 5000);
+}
+
+// Fungsi untuk menutup alert
+function closeAlert() {
+  const alertBox = document.getElementById("alert");
+  
+  alertBox.classList.add("hidden");
+  setTimeout(() => (alertBox.style.display = "none"), 300);
+}
+
+// Script untuk menangani submit form
+const form = document.getElementById("contact-form");
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(form);
+  const data = {
+    from: formData.get("from"),
+    to: formData.get("to"),
+    message: formData.get("message"),
+    song: formData.get("song") || "No song provided",
+  };
+
+  emailjs
+    .send("service_m8pxw3b", "template_xbuqc7d", data)
+    .then(() => {
+      showAlert("success", "Message Sent Successfully!");
+      form.reset();
+    })
+    .catch((err) => {
+      console.error("Error Status:", err.status); // Status error
+      console.error("Error Text:", err.text); // Detail error
+      showAlert("danger", "Failed to send Message. Please try again.");
+    });
+});
+
 </script>
 
 <script>
